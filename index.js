@@ -7,23 +7,47 @@ const formatRoundUp = formatNumber({ round: 2 });
 
 function start() {
   const countFeed = 20;
-  const feedList = []
+  const presidentFeedList = [];
+  const vicePresidentFeedList = [];
 
   for (let index = 0; index < countFeed; index++) {
-    feedList.push(getVoteContext(index));
+    presidentFeedList.push(getVoteContext(index, TYPES.PRESIDENT));
+    vicePresidentFeedList.push(getVoteContext(index, TYPES.VICE_PRESIDENT));
   }
 
-  Promise.all(feedList).then((result) => {
+  Promise.all(presidentFeedList).then((result) => {
+    console.log(`================================== PRESIDENT ===============================`)
     result.forEach((context) => {
       console.log(`================================== ${context.feed} ===============================`)
       console.log(`-- Total vote: ${format(context.totalVoteCount)} (${formatRoundUp(context.totalVotePercentage)}) as of ${context.timestamp}`)
       console.table(context.result)
     })
-  })
-}
+  });
 
-async function getVoteContext(index) {
-  const resultUrl = `https://blob-prod-president.abs-cbn.com/feed-${index + 1}/president-00199000-nation-location-1.json`;
+  Promise.all(vicePresidentFeedList).then((result) => {
+    console.log(`================================ VICE PRESIDENT =============================`)
+    result.forEach((context) => {
+      console.log(`================================== ${context.feed} ===============================`)
+      console.log(`-- Total vote: ${format(context.totalVoteCount)} (${formatRoundUp(context.totalVotePercentage)}) as of ${context.timestamp}`)
+      console.table(context.result)
+    })
+  });
+}
+// https://blob-prod-vice-president.abs-cbn.com/feed-20/vice-president-00299000-nation-location-1.json
+const PREFIX_URL = {
+  PRESIDENT : 'president-00199000',
+  VICE_PRESIDENT: 'vice-president-00299000'
+}
+const SUB_DOMAIN = {
+  PRESIDENT: 'blob-prod-president',
+  VICE_PRESIDENT: 'blob-prod-vice-president'
+};
+const TYPES = {
+  PRESIDENT: 'PRESIDENT',
+  VICE_PRESIDENT: 'VICE_PRESIDENT'
+}
+async function getVoteContext(index, type) {
+  const resultUrl = `https://${SUB_DOMAIN[type]}.abs-cbn.com/feed-${index + 1}/${PREFIX_URL[type]}-nation-location-1.json`;
   const response = await axios.get(resultUrl, {
     responseType: 'json'
   });
