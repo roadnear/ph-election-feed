@@ -1,7 +1,10 @@
 const axios = require('axios');
+const formatNumber = require('format-number');
+
+const format = formatNumber({});
 
 function start() {
-  const countFeed = 12;
+  const countFeed = 15;
   const feedList = []
 
   for (let index = 0; index < countFeed; index++) {
@@ -11,8 +14,9 @@ function start() {
   Promise.all(feedList).then((result) => {
     result.forEach((context) => {
       console.log(`================================== ${context.feed} ===============================`)
+      console.log(`-- Total vote: `, format(context.totalVoteCount))
       context.result.forEach((candidate) => {
-        console.log(`${candidate.candidateName}  -  ${candidate.voteCount}  - ${candidate.votePercentage}`)
+        console.log(`${candidate.candidateName}  -  ${format(candidate.voteCount)}  - ${candidate.votePercentage}`)
       })
       
     })
@@ -38,6 +42,7 @@ async function getVoteContext(index) {
 
   return {
     result: parsedResult,
+    totalVoteCount: voter.count,
     feed: `Feed ${index + 1}`
   };
 }
